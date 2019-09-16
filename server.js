@@ -49,50 +49,26 @@ app.post('/api/exercise/add', (req, res, next) => {
   // Saves in Exercise schema
   Exercise.create(data ,(err, exercise) => {
     if(err) return res.status(400).json({status: 'error', msg: err});
-    // res.status(200).json({exercise});
-    // console.log(exercise.id, "Obtain exercise id");
     User.findOneAndUpdate({username}, {$push: {exercise: exercise.id}}, (err, user) => {
       // In testing
       if(err) return  res.status(400).json({status: 'error', msg: err});
       if(!user) return  res.status(400).json({status: 'error', msg: err});
-      // return next();
-      // user.exercise.push()
-      // res.status(200).json({user})
     });
     res.status(200).json({exercise});
   });
-  // Exercise.create(data, (err, exercise) => {
-  //   if (err) return next(err);
-  //   res.status(200).json({exercise});
-  // });
 }); 
 
 // Get log
 app.get('/api/exercise/log?', (req, res) => {
   // const { username, query } = req.params;
   let { username, from, to, limit } = req.query;
-  // Exercise.find({username}, (err, exercise) => {
-  //   if (err) return next(err);
-  //   res.status(200).json({exercise});
-  // });
-  // With optional parameters
-  if(limit) limit = Number(limit);
-  if(from) from = new Date(from);
-  if(to) { 
-    to = new Date(to);
-    to.setDate(to.getDate() + 1);
-  }
-  console.log(limit, from, to);
-  // limit = !limit ? '' : Number(limit);
-  console.log(username, from, to, limit, 'From console');
-  User
+  Exercise
   .find({
     username: username,
-    // match: { $gt: from, $lt: to }
+    date: {$gte: from, $lte: to}
   })
   .select('username description duration date')
   .limit(limit)
-  .populate('exercise')
   .exec((err, exercise) => {
     if (err) return res.status(400).json({status: 'error', msg: err});
     res.status(200).json({exercise});
